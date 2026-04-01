@@ -11,8 +11,11 @@
 
 ## Live Dashboard
 
-> Replace this URL after GitHub Pages is enabled:
+> Sample GitHub Pages is enabled:
 > **https://impacteers2026-sketch.github.io/marketing-kpi-dashboard/**
+
+> Logic Reference GitHub Page Section is enabled:
+> **https://impacteers2026-sketch.github.io/marketing-kpi-dashboard/#:~:text=COMPUTED%20FIELD%20LOGIC%20REFERENCE%20%E2%80%94%20DEV%20IMPLEMENTATION%20GUIDE**
 
 ---
 
