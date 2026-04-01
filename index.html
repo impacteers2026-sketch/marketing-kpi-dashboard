@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Impacteers — Weekly KPI Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:#f0f4f8;color:#1e293b;font-size:13px;min-width:1100px}
+
+.topbar{background:#fff;border-bottom:1.5px solid #e2e8f0;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:100}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-dot{width:10px;height:10px;background:#185fa5;border-radius:50%}
+.brand-name{font-size:15px;font-weight:700;color:#0f3460}
+.brand-sub{font-size:11px;color:#94a3b8;font-weight:400}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge-api{background:#eff6ff;color:#185fa5;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #bfdbfe}
+.badge-live{background:#ecfdf5;color:#059669;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #a7f3d0}
+
+.filters-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:10px 28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filter-group{display:flex;flex-direction:column;gap:4px}
+.filter-label{font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.09em}
+select{font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;color:#334155;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:6px 30px 6px 11px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;transition:border-color .2s,box-shadow .2s}
+select:hover{border-color:#185fa5}
+select:focus{border-color:#185fa5;box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.filter-sep{width:1px;height:44px;background:#e2e8f0;margin:0 4px}
+
+.organic-toggle{display:flex;align-items:center;gap:7px;padding:5px 12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;cursor:pointer;transition:all .2s;user-select:none}
+.organic-toggle:hover{background:#dcfce7;border-color:#86efac}
+.organic-toggle.active{background:#dcfce7;border-color:#22c55e}
+.organic-toggle input[type=checkbox]{accent-color:#16a34a;width:13px;height:13px;cursor:pointer}
+.organic-toggle-label{font-size:10px;font-weight:600;color:#15803d;cursor:pointer}
+.organic-toggle-sub{font-size:9px;color:#4ade80;font-weight:400}
+
+.filter-status{font-size:10px;color:#94a3b8;margin-left:auto;max-width:340px;text-align:right;line-height:1.5}
+
+.dash{padding:28px 28px;max-width:1400px;margin:0 auto}
+.section-q{font-size:16px;font-weight:700;color:#0f3460;margin-bottom:4px;letter-spacing:-.01em}
+.section-hint{font-size:11px;color:#94a3b8;margin-bottom:16px;font-weight:400;line-height:1.6}
+.section-header{margin:32px 0 14px}
+.section-header:first-child{margin-top:0}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;transition:box-shadow .2s}
+.kpi-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.07)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent,#185fa5)}
+.kpi-label{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.kpi-val{font-size:32px;font-weight:700;color:#0f3460;line-height:1;letter-spacing:-.02em}
+.kpi-delta{font-size:11px;margin-top:8px;font-weight:500;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.kpi-delta-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.up .kpi-delta-pill{background:#ecfdf5;color:#059669}
+.down .kpi-delta-pill{background:#fef2f2;color:#dc2626}
+.warn .kpi-delta-pill{background:#fffbeb;color:#d97706}
+.kpi-prev{font-size:10px;color:#cbd5e1}
+
+.row2{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}
+.row2-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.card{background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px 22px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.card-title{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:3px}
+.card-sub{font-size:10px;color:#94a3b8;margin-bottom:14px;line-height:1.5}
+.chart-wrap{position:relative}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748b;font-weight:500}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+.data-table{width:100%;border-collapse:collapse;font-size:11px}
+.data-table th{font-weight:600;color:#94a3b8;text-align:left;padding:8px 10px;border-bottom:1.5px solid #f1f5f9;font-size:9px;text-transform:uppercase;letter-spacing:.07em}
+.data-table td{padding:7px 10px;color:#334155;border-bottom:1px solid #f8fafc}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#f8fafc}
+.badge{display:inline-flex;align-items:center;font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700}
+.badge-up{background:#ecfdf5;color:#059669}
+.badge-warn{background:#fffbeb;color:#b45309}
+.badge-down{background:#fef2f2;color:#dc2626}
+.badge-neutral{background:#f1f5f9;color:#64748b}
+
+/* position range filter */
+.pos-filter{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.pos-filter label{font-size:11px;color:#64748b;font-weight:500}
+.pos-input{font-family:'Poppins',sans-serif;font-size:11px;width:58px;padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:7px;color:#334155;text-align:center;outline:none}
+.pos-input:focus{border-color:#185fa5}
+.pos-btn{font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;padding:5px 14px;background:#185fa5;color:#fff;border:none;border-radius:7px;cursor:pointer}
+.pos-btn:hover{background:#0f4a8a}
+
+/* CTR decay chart note */
+.insight-note{background:#f0f9ff;border-left:3px solid #38bdf8;border-radius:0 8px 8px 0;padding:10px 14px;margin-top:12px;font-size:10px;color:#0369a1;line-height:1.65}
+.insight-note b{font-weight:600}
+
+.divider{height:1px;background:#f1f5f9;margin:28px 0}
+
+/* Logic section */
+.logic-section{background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:14px;padding:24px 26px;margin-top:28px}
+.logic-title{font-size:11px;font-weight:700;color:#185fa5;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.logic-title::before{content:'';display:inline-block;width:3px;height:14px;background:#185fa5;border-radius:2px}
+.logic-intro{font-size:11px;color:#64748b;margin-bottom:18px;line-height:1.7}
+.logic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.logic-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px}
+.logic-field{font-size:11px;font-weight:700;color:#1e293b;margin-bottom:4px}
+.logic-source{font-size:9px;font-weight:600;color:#185fa5;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;background:#eff6ff;display:inline-block;padding:2px 8px;border-radius:4px}
+.logic-formula{font-family:'Courier New',monospace;font-size:10px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:9px 11px;line-height:1.75;margin-bottom:8px;white-space:pre-wrap}
+.logic-formula b{color:#185fa5}
+.logic-note{font-size:10px;color:#64748b;line-height:1.6}
+
+.footer{margin-top:36px;padding:16px 0;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center}
+.footer-note{font-size:10px;color:#cbd5e1}
+.footer-tag{font-size:10px;font-weight:600;color:#94a3b8}
+.dp-quick{font-size:11px;font-weight:500;color:#334155;padding:7px 10px;border-radius:7px;cursor:pointer;transition:background .15s}
+.dp-quick:hover{background:#eff6ff;color:#185fa5}
+.dp-quick.active{background:#eff6ff;color:#185fa5;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div>
+      <div class="brand-name">Impacteers</div>
+      <div class="brand-sub">Weekly KPI Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="badge-api">GA4 Direct API</span>
+    <span class="badge-api">GSC Direct API</span>
+    <span class="badge-live">● Dummy Data</span>
+  </div>
+</div>
+
+<!-- FILTERS BAR -->
+<div class="filters-bar">
+  <div class="filter-group" style="position:relative">
+    <span class="filter-label">Date range</span>
+    <div id="dateBtn" onclick="toggleDatePicker()" style="display:flex;align-items:center;gap:8px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;color:#334155;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:6px 11px;cursor:pointer;min-width:160px;user-select:none;transition:border-color .2s">
+      <span id="dateIcon" style="font-size:13px">&#128197;</span>
+      <span id="dateBtnLabel">Last 7 days</span>
+      <span style="margin-left:auto;color:#94a3b8;font-size:10px">&#9660;</span>
+    </div>
+    <!-- Date picker popup -->
+    <div id="datePicker" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px;width:300px;box-shadow:0 8px 30px rgba(0,0,0,.12)">
+      <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px">Quick select</div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+        <div class="dp-quick" onclick="setQuickDate('7d','Last 7 days')" id="dq-7d">Last 7 days</div>
+        <div class="dp-quick" onclick="setQuickDate('14d','Last 14 days')" id="dq-14d">Last 14 days</div>
+        <div class="dp-quick" onclick="setQuickDate('28d','Last 28 days')" id="dq-28d">Last 28 days</div>
+      </div>
+      <div style="height:1px;background:#f1f5f9;margin-bottom:12px"></div>
+      <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px">Custom range</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="font-size:9px;color:#94a3b8;font-weight:600;margin-bottom:4px">FROM</div>
+          <input type="date" id="dateFrom" style="font-family:'Poppins',sans-serif;font-size:11px;width:100%;padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:7px;color:#334155;outline:none" onchange="updateCustomLabel()">
+        </div>
+        <div>
+          <div style="font-size:9px;color:#94a3b8;font-weight:600;margin-bottom:4px">TO</div>
+          <input type="date" id="dateTo" style="font-family:'Poppins',sans-serif;font-size:11px;width:100%;padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:7px;color:#334155;outline:none" onchange="updateCustomLabel()">
+        </div>
+      </div>
+      <button onclick="applyCustomDate()" style="font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;width:100%;padding:8px;background:#185fa5;color:#fff;border:none;border-radius:8px;cursor:pointer">Apply custom range</button>
+      <div id="dateRangeNote" style="font-size:10px;color:#94a3b8;margin-top:8px;text-align:center"></div>
+    </div>
+  </div>
+
+  <div class="filter-sep"></div>
+
+  <div class="filter-group">
+    <span class="filter-label">Sub-domain</span>
+    <select id="filterDomain" onchange="applyFilters()">
+      <option value="all">All domains</option>
+      <option value="main">impacteers.com</option>
+      <option value="futurejobs">futurejobs.impacteers.com</option>
+      <option value="recruitment">recruitment.impacteers.com</option>
+      <option value="examprep">examprep.impacteers.com</option>
+    </select>
+  </div>
+
+  <div class="filter-sep"></div>
+
+  <div class="filter-group">
+    <span class="filter-label">Channel</span>
+    <select id="filterChannel" onchange="applyFilters()">
+      <option value="all">All channels</option>
+      <option value="organic">Organic search</option>
+      <option value="direct">Direct</option>
+      <option value="gje">Google Jobs Apply</option>
+      <option value="paid_social">Paid social</option>
+      <option value="referral">Referral</option>
+      <option value="llm">LLM Citation</option>
+    </select>
+  </div>
+
+  <div class="filter-sep"></div>
+
+  <!-- Organic Only toggle -->
+  <div class="filter-group">
+    <span class="filter-label">Quick filter</span>
+    <label class="organic-toggle" id="organicToggle" onclick="toggleOrganic()">
+      <input type="checkbox" id="organicCheck" onclick="event.stopPropagation();toggleOrganic()">
+      <span>
+        <span class="organic-toggle-label">Organic only</span><br>
+        <span class="organic-toggle-sub">Organic search + LLM citations</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="filter-status" id="filterStatus">Showing: all domains · all channels · w/e Apr 1 2026</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash">
+
+<!-- ══ SECTION 1: SNAPSHOT ══ -->
+<div class="section-header">
+  <div class="section-q" id="q1">Are we growing this week?</div>
+  <div class="section-hint" id="h1">Core platform health — total reach, visits, and search visibility. WoW delta computed from two dateRange calls in a single GA4 request.</div>
+</div>
+<div class="kpi-grid" id="kpiGrid">
+  <div class="kpi-card up" style="--accent:#185fa5">
+    <div class="kpi-label">Total users</div>
+    <div class="kpi-val" id="kv1">14,308</div>
+    <div class="kpi-delta"><span class="kpi-delta-pill" id="kd1">▲ 12% WoW</span><span class="kpi-prev" id="kp1">vs 12,775 last week</span></div>
+  </div>
+  <div class="kpi-card up" style="--accent:#1d9e75">
+    <div class="kpi-label">Sessions</div>
+    <div class="kpi-val" id="kv2">17,650</div>
+    <div class="kpi-delta"><span class="kpi-delta-pill" id="kd2">▲ 9% WoW</span><span class="kpi-prev" id="kp2">vs 16,193 last week</span></div>
+  </div>
+  <div class="kpi-card up" style="--accent:#185fa5">
+    <div class="kpi-label">GSC clicks</div>
+    <div class="kpi-val" id="kv3">8,570</div>
+    <div class="kpi-delta"><span class="kpi-delta-pill" id="kd3">▲ 6% WoW</span><span class="kpi-prev" id="kp3">vs 8,085 last week</span></div>
+  </div>
+  <div class="kpi-card up" style="--accent:#ba7517">
+    <div class="kpi-label">Avg. search position</div>
+    <div class="kpi-val" id="kv4">7.4</div>
+    <div class="kpi-delta"><span class="kpi-delta-pill" id="kd4">▼ 0.3 improved</span><span class="kpi-prev" id="kp4">vs 7.7 last week</span></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ SECTION 2: TRAFFIC ══ -->
+<div class="section-header">
+  <div class="section-q" id="q2">Where is our traffic coming from?</div>
+  <div class="section-hint">Sessions by domain and channel mix. Switch domains above to see property-level breakdown — data updates across all charts simultaneously.</div>
+</div>
+<div class="row2">
+  <div class="card">
+    <div class="card-title">Sessions by domain — 7 days</div>
+    <div class="card-sub">GA4 · dimensions: date, hostname · metrics: sessions</div>
+    <div class="legend" id="trafficLegend">
+      <span class="leg-item"><span class="leg-dot" style="background:#185fa5"></span>impacteers.com</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#1d9e75"></span>futurejobs</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#ba7517"></span>examprep</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#94a3b8"></span>recruitment</span>
+    </div>
+    <div class="chart-wrap" style="height:220px"><canvas id="trafficLine"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Channel mix</div>
+    <div class="card-sub">GA4 · dimension: sessionDefaultChannelGroup · LLM is a computed segment</div>
+    <div class="legend" id="donutLegend">
+      <span class="leg-item"><span class="leg-dot" style="background:#185fa5"></span>Organic <span id="pctOrganic">30.5%</span></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#94a3b8"></span>Direct <span id="pctDirect">44.5%</span></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#1d9e75"></span>GJE <span id="pctGJE">7.2%</span></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#ba7517"></span>Paid <span id="pctPaid">5%</span></span>
+      <span class="leg-item"><span class="leg-dot" style="background:#534ab7"></span>Referral <span id="pctRef">12.8%</span></span>
+    </div>
+    <div class="chart-wrap" style="height:220px"><canvas id="channelDonut"></canvas></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ SECTION 3: CONTENT ══ -->
+<div class="section-header">
+  <div class="section-q">What content is actually working?</div>
+  <div class="section-hint">Pages ranked by total users. Engagement vs bounce scatter reveals quality — top-right is the ideal zone. Hover dots for page details.</div>
+</div>
+<div class="row2">
+  <div class="card">
+    <div class="card-title">Top pages by total users</div>
+    <div class="card-sub">GA4 · dimensions: pagePath · metrics: totalUsers, engagementRate, averageSessionDuration</div>
+    <div class="chart-wrap" style="height:240px"><canvas id="topPages"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Engagement vs bounce</div>
+    <div class="card-sub">Each dot = one page · Top-right = high engagement, low bounce · Ideal zone</div>
+    <div class="chart-wrap" style="height:240px"><canvas id="engScatter"></canvas></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ SECTION 4: GSC ══ -->
+<div class="section-header">
+  <div class="section-q">What opportunities do we have to improve Google rankings?</div>
+  <div class="section-hint">Pages in the "opportunity zone" (positions 4–20) with high impressions but low CTR are your highest-ROI optimisation targets this week. Filter below to adjust the position window.</div>
+</div>
+<div class="row2-eq">
+  <div class="card">
+    <div class="card-title">CTR decay curve — avg CTR by position</div>
+    <div class="card-sub">GSC · Expected CTR benchmark overlaid. Pages below the curve need title/meta work.</div>
+    <div class="chart-wrap" style="height:190px"><canvas id="ctrDecay"></canvas></div>
+    <div class="insight-note" style="margin-bottom:14px">Pages ranked 1–3 capture most clicks. <b>Positions 4–10 are your lever</b> — a single well-optimised title can move a page from position 8 to position 4 and triple its CTR.</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:600;color:#1e293b">All pages — ranked by opportunity score</span>
+      <span style="font-size:9px;color:#94a3b8;font-weight:500;background:#f1f5f9;padding:2px 8px;border-radius:4px">score = impressions × (5% − actual CTR)</span>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Page</th><th>Position</th><th>Impressions</th><th>CTR</th><th style="color:#185fa5">Opp. score</th></tr></thead>
+      <tbody id="ctrInsightTable"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Opportunity pages — position range filter</div>
+    <div class="card-sub">GSC · Computed: pages with position in range, impressions &gt; 500, CTR below benchmark</div>
+    <div class="pos-filter">
+      <label>Show positions between</label>
+      <input type="number" class="pos-input" id="posMin" value="4" min="1" max="50">
+      <label>and</label>
+      <input type="number" class="pos-input" id="posMax" value="20" min="1" max="50">
+      <button class="pos-btn" onclick="filterOpportunities()">Apply</button>
+    </div>
+    <table class="data-table" id="oppTable">
+      <thead><tr><th>Page / Query</th><th>Position</th><th>Impressions</th><th>CTR</th><th>Opp. Score</th></tr></thead>
+      <tbody id="oppTableBody"></tbody>
+    </table>
+    <div class="insight-note" style="margin-top:10px">Opportunity score = <b>impressions × (5% benchmark − actual CTR)</b>. Higher score = more clicks left on the table. Sort by this column to prioritise.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ SECTION 5: QUERY INTEL ══ -->
+<div class="section-header">
+  <div class="section-q">Are people finding us without knowing us?</div>
+  <div class="section-hint">Branded queries confirm brand equity. Non-branded queries confirm organic discoverability — the strategic growth lever. Split is computed client-side from raw GSC query data.</div>
+</div>
+<div class="row2-eq">
+  <div class="card">
+    <div class="card-title">Branded vs non-branded</div>
+    <div class="card-sub">GSC · classified via JS brandTerms filter — no native API field</div>
+    <div class="legend">
+      <span class="leg-item"><span class="leg-dot" style="background:#b5d4f4"></span>Impressions</span>
+      <span class="leg-item"><span class="leg-dot" style="background:#185fa5"></span>Clicks</span>
+    </div>
+    <div class="chart-wrap" style="height:180px"><canvas id="brandBar"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Top non-branded queries</div>
+    <div class="card-sub">High-impression discovery terms · CTR below 3% = optimise title/meta urgently</div>
+    <table class="data-table">
+      <thead><tr><th>Query</th><th>Impr.</th><th>CTR</th><th>Pos.</th></tr></thead>
+      <tbody>
+        <tr><td>tnpsc group 2 prep</td><td>6,400</td><td>4.9%</td><td><span class="badge badge-up">3.8</span></td></tr>
+        <tr><td>jobs freshers chennai</td><td>5,200</td><td>3.5%</td><td><span class="badge badge-up">6.1</span></td></tr>
+        <tr><td>it jobs bangalore 2026</td><td>3,900</td><td>2.5%</td><td><span class="badge badge-warn">8.4</span></td></tr>
+        <tr><td>career guidance btech</td><td>3,100</td><td>2.4%</td><td><span class="badge badge-warn">9.2</span></td></tr>
+        <tr><td>govt job prep online</td><td>2,800</td><td>1.9%</td><td><span class="badge badge-down">11.3</span></td></tr>
+        <tr><td>dsa placement course</td><td>2,200</td><td>2.1%</td><td><span class="badge badge-down">12.8</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ SECTION 6: LLM ══ -->
+<div class="section-header">
+  <div class="section-q">Are AI assistants recommending us?</div>
+  <div class="section-hint">LLM referral traffic is the emerging discovery channel. Users arriving from ChatGPT, Perplexity, or Gemini were actively recommended — intent is high. Filter Channel → LLM Citation above to isolate this segment.</div>
+</div>
+<div class="row2-eq">
+  <div class="card">
+    <div class="card-title">Sessions by AI platform</div>
+    <div class="card-sub">GA4 · filter: sessionMedium = referral AND sessionSource in LLM domain list</div>
+    <div class="chart-wrap" style="height:190px"><canvas id="llmBar"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">LLM traffic quality</div>
+    <div class="card-sub">LLM visitors consistently outperform paid social on engagement — high-intent signal</div>
+    <table class="data-table">
+      <thead><tr><th>Platform</th><th>Sessions</th><th>Eng. rate</th><th>Avg time</th></tr></thead>
+      <tbody>
+        <tr><td>ChatGPT</td><td>124</td><td><span class="badge badge-up">62%</span></td><td>2:14</td></tr>
+        <tr><td>Perplexity</td><td>88</td><td><span class="badge badge-up">58%</span></td><td>1:52</td></tr>
+        <tr><td>Gemini</td><td>41</td><td><span class="badge badge-warn">44%</span></td><td>1:10</td></tr>
+        <tr><td>Claude.ai</td><td>18</td><td><span class="badge badge-warn">41%</span></td><td>0:58</td></tr>
+        <tr><td>You.com</td><td>9</td><td>33%</td><td>0:42</td></tr>
+        <tr><td style="font-weight:600">Total</td><td style="font-weight:600">280</td><td><span class="badge badge-up">54% avg</span></td><td>1:35</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ SECTION 7: ENGAGEMENT ══ -->
+<div class="section-header">
+  <div class="section-q">Are visitors actually engaging or just bouncing?</div>
+  <div class="section-hint">Engagement rate and session time by source. Bing organic outlier (7.1 min) signals high content-intent traffic. Status tags are computed — see logic reference below.</div>
+</div>
+<div class="row3">
+  <div class="card">
+    <div class="card-title">Engagement rate by source</div>
+    <div class="card-sub">GA4 · metrics: engagementRate per sessionSourceMedium · colour = computed threshold</div>
+    <div class="chart-wrap" style="height:210px"><canvas id="engBar"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">KPI status tracker</div>
+    <div class="card-sub">Status tags are computed — not from API · logic defined in reference section below</div>
+    <table class="data-table">
+      <thead><tr><th>KPI</th><th>Current</th><th>Target</th><th>Status</th></tr></thead>
+      <tbody id="kpiStatusTable">
+        <tr><td>Sessions</td><td>17,650</td><td>20,000</td><td><span class="badge badge-warn" id="st1">Growing</span></td></tr>
+        <tr><td>Engagement rate</td><td>37.7%</td><td>50%</td><td><span class="badge badge-down" id="st2">Below</span></td></tr>
+        <tr><td>GSC avg position</td><td>7.4</td><td>&lt; 5</td><td><span class="badge badge-warn" id="st3">Monitor</span></td></tr>
+        <tr><td>GJE sessions</td><td>1,265</td><td>1,800</td><td><span class="badge badge-up" id="st4">Healthy</span></td></tr>
+        <tr><td>LLM referral</td><td>280</td><td>500</td><td><span class="badge badge-warn" id="st5">Early</span></td></tr>
+        <tr><td>New user %</td><td>95.2%</td><td>&gt; 88%</td><td><span class="badge badge-up" id="st6">On track</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Avg. engagement time by source</div>
+    <div class="card-sub">GA4 · metric: averageSessionDuration per sessionSourceMedium · minutes</div>
+    <div class="chart-wrap" style="height:210px"><canvas id="timeBar"></canvas></div>
+  </div>
+</div>
+
+<!-- ══ COMPUTED LOGIC REFERENCE ══ -->
+<div class="logic-section">
+  <div class="logic-title">Computed field logic reference — dev implementation guide</div>
+  <p class="logic-intro">The fields below are <strong>not returned by GA4 or GSC APIs</strong>. They must be computed client-side (or in the backend before render). Each formula, threshold rule, and classification logic is defined here precisely so the dev can implement without ambiguity. All threshold values should live in a separate <code>config.json</code> — never hardcoded in render logic.</p>
+
+  <div class="logic-grid">
+
+    <div class="logic-card">
+      <div class="logic-field">Week-on-week (WoW) % delta</div>
+      <div class="logic-source">Derived · GA4 two-dateRange call</div>
+      <div class="logic-formula"><b>// Request both ranges in one API call</b>
+dateRanges: [
+  { startDate:"7daysAgo", endDate:"today" },
+  { startDate:"14daysAgo", endDate:"8daysAgo" }
+]
+<b>// GA4 returns dateRangeName per row</b>
+delta = ((thisWeek - lastWeek) / lastWeek) * 100
+display = (delta > 0 ? "▲ " : "▼ ")
+        + Math.abs(delta).toFixed(1) + "% WoW"</div>
+      <div class="logic-note">Arrow colour: delta ≥ 0 = green pill. delta &lt; 0 = red pill. Exception: avg position — lower is better so invert the colour logic.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">KPI status tag logic</div>
+      <div class="logic-source">Derived · GA4 + GSC + config.json</div>
+      <div class="logic-formula"><b>function</b> getTag(current, target, type) {
+  <b>if</b> (type === "position") {
+    <b>if</b> (current &lt;= target)      return "Healthy";
+    <b>if</b> (current &lt;= target*1.5) return "Monitor";
+    return "At risk";
+  }
+  const r = current / target;
+  <b>if</b> (r >= 1.0) return "On track";
+  <b>if</b> (r >= 0.8) return "Growing";
+  <b>if</b> (r >= 0.6) return "Monitor";
+  <b>if</b> (r >= 0.4) return "Early";
+  return "Below";
+}
+<b>// Badge colour map:</b>
+// On track / Healthy → badge-up (green)
+// Growing / Monitor / Early → badge-warn
+// Below / At risk → badge-down (red)</div>
+      <div class="logic-note">Define target values in config.json. Re-run this function on every data refresh — do not cache tag strings.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">GSC position badge colour</div>
+      <div class="logic-source">Derived · GSC position value</div>
+      <div class="logic-formula"><b>function</b> posBadge(pos) {
+  <b>if</b> (pos &lt;= 5)  return "badge-up";   // green
+  <b>if</b> (pos &lt;= 10) return "badge-warn"; // amber
+  return "badge-down";                  // red
+}
+<b>// Zone labels for chart annotations:</b>
+// 1–3   → "Top rank"
+// 4–10  → "Opportunity zone"
+// 11–20 → "Quick-win target"</div>
+      <div class="logic-note">GA4 returns position as a float. Round to 1 decimal for display. Sort the ranked pages table by position ASC before rendering.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">Branded vs non-branded classification</div>
+      <div class="logic-source">Derived · GSC query dimension (client-side JS)</div>
+      <div class="logic-formula"><b>// Update this list when new brands launch</b>
+const brandTerms = [
+  "impacteers", "futurejobs",
+  "xooper", "genrichers"
+];
+<b>function</b> isBranded(query) {
+  return brandTerms.some(t =>
+    query.toLowerCase().includes(t));
+}
+<b>// Aggregate after classification:</b>
+rows.forEach(r => {
+  const bucket = isBranded(r.query)
+    ? branded : nonBranded;
+  bucket.impressions += r.impressions;
+  bucket.clicks += r.clicks;
+});</div>
+      <div class="logic-note">GSC has no native branded field. This split must run client-side. Store brandTerms in config.json for easy updates.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">LLM Citation channel — filter logic</div>
+      <div class="logic-source">Derived · GA4 sessionSource + sessionMedium</div>
+      <div class="logic-formula"><b>// Store in config — update quarterly</b>
+const llmDomains = [
+  "chat.openai.com",
+  "perplexity.ai",
+  "gemini.google.com",
+  "claude.ai",
+  "you.com",
+  "copilot.microsoft.com",
+  "bing.com/chat",
+  "kagi.com"
+];
+<b>// GA4 API filter:</b>
+{
+  filter: {
+    andGroup: [
+      { fieldName:"sessionMedium",
+        stringFilter:{ value:"referral" }},
+      { fieldName:"sessionSource",
+        inListFilter:{ values:llmDomains }}
+    ]
+  }
+}</div>
+      <div class="logic-note">GA4 does not have a native LLM channel. This is a custom segment. Run as a separate parallel API call and merge into the channel mix before rendering the donut chart.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">Organic only toggle — filter scope</div>
+      <div class="logic-source">Derived · GA4 sessionMedium + LLM list</div>
+      <div class="logic-formula"><b>// When organic toggle = ON:</b>
+<b>// Include:</b>
+sessionMedium === "organic"
+OR sessionSource in llmDomains
+
+<b>// Exclude:</b>
+sessionMedium === "none"  // direct
+sessionMedium === "paid"
+sessionMedium === "cpc"
+sessionMedium === "referral"
+  (unless source in llmDomains)
+
+<b>// GA4 dimensionFilter equivalent:</b>
+{
+  orGroup: [
+    { fieldName:"sessionMedium",
+      stringFilter:{ value:"organic" }},
+    { fieldName:"sessionSource",
+      inListFilter:{ values:llmDomains }}
+  ]
+}</div>
+      <div class="logic-note">The toggle re-queries GA4 with the combined filter. LLM referrals are included because they represent intent-driven organic discovery — not paid or direct visits.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">GJE segment isolation</div>
+      <div class="logic-source">Derived · GA4 sessionSourceMedium</div>
+      <div class="logic-formula"><b>// GJE is NOT in sessionDefaultChannelGroup</b>
+<b>// as a separate channel — it merges into</b>
+<b>// Organic Search. Must be extracted first.</b>
+
+<b>// Step 1:</b> Run parallel query filtered to:
+sessionSourceMedium
+  = "google_jobs_apply / organic"
+
+<b>// Step 2:</b> Subtract GJE sessions from
+// the Organic Search total before
+// rendering the channel mix donut.
+
+<b>// Step 3:</b> Add GJE as its own donut segment.</div>
+      <div class="logic-note">If you skip this, GJE traffic inflates Organic Search numbers and hides the true organic content performance. Always isolate before grouping.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">CTR opportunity score</div>
+      <div class="logic-source">Derived · GSC clicks, impressions, position</div>
+      <div class="logic-formula"><b>// Filter criteria first:</b>
+const BENCHMARK_CTR = 0.05; // 5%
+const MIN_IMPRESSIONS = 500;
+
+<b>function</b> oppScore(row) {
+  return row.impressions
+    * (BENCHMARK_CTR - row.ctr);
+}
+<b>// Apply filter + sort:</b>
+quickWins = rows
+  .filter(r =>
+    r.position > posMin
+    && r.position &lt;= posMax
+    && r.impressions > MIN_IMPRESSIONS)
+  .map(r => ({...r, score:oppScore(r)}))
+  .sort((a,b) => b.score - a.score);</div>
+      <div class="logic-note">Score represents clicks left on the table if CTR reached the 5% benchmark. Negative scores (already above 5% CTR) are filtered out — those pages are performing well.</div>
+    </div>
+
+    <div class="logic-card">
+      <div class="logic-field">Domain-level data segmentation</div>
+      <div class="logic-source">Derived · GA4 hostname dimension filter</div>
+      <div class="logic-formula"><b>// When sub-domain filter changes,</b>
+<b>// re-run GA4 request with filter:</b>
+const domainMap = {
+  all: null, // no filter
+  main: "www.impacteers.com",
+  futurejobs: "futurejobs.impacteers.com",
+  recruitment: "recruitment.impacteers.com",
+  examprep: "examprep.impacteers.com"
+};
+<b>// Add to GA4 dimensionFilter:</b>
+{
+  fieldName: "hostname",
+  stringFilter: {
+    matchType: "EXACT",
+    value: domainMap[selectedDomain]
+  }
+}</div>
+      <div class="logic-note">All 4 domains must share one GA4 property with cross-domain tracking enabled. The hostname dimension differentiates them. Each filter change triggers a fresh API call — use debounce (300ms) to avoid quota waste.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-note">All figures are illustrative dummy data · Replace data arrays with live GA4 + GSC API responses on implementation</span>
+  <span class="footer-tag">Impacteers / Genrichers Innovations Pvt Ltd · Chennai · Dashboard v3.0 · Apr 2026</span>
+</div>
+</div><!-- end dash -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+Chart.defaults.font.family = "'Poppins', sans-serif";
+Chart.defaults.font.size = 11;
+
+/* ══════════════════════════════════════
+   DUMMY DATA — keyed by domain + channel
+   Replace each dataset with live GA4 /
+   GSC API response for that filter combo.
+══════════════════════════════════════ */
+const DATA = {
+  all: {
+    all: {
+      kpi:{ users:14308, sessions:17650, clicks:8570, position:7.4,
+            usersLw:12775, sessionsLw:16193, clicksLw:8085, positionLw:7.7 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'impacteers.com', data:[1200,1450,1800,1650,1400,900,700], color:'#185fa5' },
+          { label:'futurejobs',     data:[820,870,950,900,840,680,620],     color:'#1d9e75' },
+          { label:'examprep',       data:[200,240,310,360,420,390,340],     color:'#ba7517' },
+          { label:'recruitment',    data:[120,140,160,180,150,110,100],     color:'#94a3b8' },
+        ]},
+      donut:{ data:[30.5,44.5,7.2,5,12.8], labels:['Organic','Direct','GJE','Paid','Referral'] },
+    },
+    organic: {
+      kpi:{ users:5371, sessions:6659, clicks:8570, position:7.4,
+            usersLw:4800, sessionsLw:5900, clicksLw:8085, positionLw:7.7 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'impacteers.com', data:[480,560,710,640,550,340,260], color:'#185fa5' },
+          { label:'futurejobs',     data:[320,340,390,360,320,260,220], color:'#1d9e75' },
+          { label:'examprep',       data:[140,160,200,240,290,260,220], color:'#ba7517' },
+          { label:'recruitment',    data:[40,50,60,70,55,40,35],        color:'#94a3b8' },
+        ]},
+      donut:{ data:[100], labels:['Organic'] },
+    },
+    llm: {
+      kpi:{ users:264, sessions:280, clicks:0, position:0,
+            usersLw:190, sessionsLw:210, clicksLw:0, positionLw:0 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'ChatGPT',    data:[18,22,28,24,16,9,7],  color:'#185fa5' },
+          { label:'Perplexity', data:[12,14,18,16,12,8,8],  color:'#534ab7' },
+          { label:'Gemini',     data:[5,7,8,8,6,4,3],       color:'#1d9e75' },
+          { label:'Claude.ai',  data:[2,3,4,3,3,2,1],       color:'#ba7517' },
+        ]},
+      donut:{ data:[44.3,31.4,14.6,6.4,3.2], labels:['ChatGPT','Perplexity','Gemini','Claude.ai','Other'] },
+    },
+    gje: {
+      kpi:{ users:880, sessions:1265, clicks:0, position:0,
+            usersLw:760, sessionsLw:1100, clicksLw:0, positionLw:0 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'futurejobs', data:[180,200,240,220,190,120,115], color:'#1d9e75' },
+        ]},
+      donut:{ data:[100], labels:['Google Jobs Apply'] },
+    },
+    paid_social: {
+      kpi:{ users:1079, sessions:1084, clicks:0, position:0,
+            usersLw:980, sessionsLw:1020, clicksLw:0, positionLw:0 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'Paid social', data:[155,160,175,160,150,142,142], color:'#ba7517' },
+        ]},
+      donut:{ data:[100], labels:['Paid Social'] },
+    },
+    direct: {
+      kpi:{ users:6673, sessions:7862, clicks:0, position:0,
+            usersLw:6100, sessionsLw:7200, clicksLw:0, positionLw:0 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'Direct', data:[1120,1160,1280,1200,1100,1020,982], color:'#94a3b8' },
+        ]},
+      donut:{ data:[100], labels:['Direct'] },
+    },
+    referral: {
+      kpi:{ users:416, sessions:493, clicks:0, position:0,
+            usersLw:360, sessionsLw:440, clicksLw:0, positionLw:0 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'Referral', data:[70,72,80,78,68,60,65], color:'#534ab7' },
+        ]},
+      donut:{ data:[100], labels:['Referral'] },
+    },
+  },
+  main: {
+    all: {
+      kpi:{ users:3817, sessions:5707, clicks:4800, position:4.8,
+            usersLw:3400, sessionsLw:5100, clicksLw:4200, positionLw:5.2 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'impacteers.com', data:[700,820,1100,960,820,480,430], color:'#185fa5' }]},
+      donut:{ data:[38,36,6,4,16], labels:['Organic','Direct','GJE','Paid','Referral'] },
+    },
+    organic: {
+      kpi:{ users:2100, sessions:2900, clicks:4800, position:4.8,
+            usersLw:1850, sessionsLw:2600, clicksLw:4200, positionLw:5.2 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'impacteers.com (organic)', data:[340,390,510,460,380,200,180], color:'#185fa5' }]},
+      donut:{ data:[100], labels:['Organic'] },
+    },
+  },
+  futurejobs: {
+    all: {
+      kpi:{ users:680, sessions:890, clicks:2200, position:9.6,
+            usersLw:620, sessionsLw:820, clicksLw:2000, positionLw:10.1 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'futurejobs.impacteers.com', data:[128,140,160,148,126,98,90], color:'#1d9e75' }]},
+      donut:{ data:[22,30,42,4,2], labels:['Organic','Direct','GJE','Paid','Referral'] },
+    },
+    organic: {
+      kpi:{ users:340, sessions:480, clicks:2200, position:9.6,
+            usersLw:290, sessionsLw:420, clicksLw:2000, positionLw:10.1 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'futurejobs (organic)', data:[48,56,72,64,52,38,36], color:'#1d9e75' }]},
+      donut:{ data:[100], labels:['Organic'] },
+    },
+  },
+  recruitment: {
+    all: {
+      kpi:{ users:420, sessions:580, clicks:1100, position:12.4,
+            usersLw:380, sessionsLw:520, clicksLw:980, positionLw:13.1 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'recruitment.impacteers.com', data:[82,88,96,90,80,68,76], color:'#534ab7' }]},
+      donut:{ data:[18,52,0,8,22], labels:['Organic','Direct','GJE','Paid','Referral'] },
+    },
+    organic: {
+      kpi:{ users:180, sessions:240, clicks:1100, position:12.4,
+            usersLw:155, sessionsLw:210, clicksLw:980, positionLw:13.1 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'recruitment (organic)', data:[24,28,38,34,28,22,20], color:'#534ab7' }]},
+      donut:{ data:[100], labels:['Organic'] },
+    },
+  },
+  examprep: {
+    all: {
+      kpi:{ users:410, sessions:680, clicks:1800, position:5.2,
+            usersLw:360, sessionsLw:590, clicksLw:1600, positionLw:5.8 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'examprep.impacteers.com', data:[80,96,124,108,120,100,92], color:'#ba7517' }]},
+      donut:{ data:[58,24,0,2,16], labels:['Organic','Direct','GJE','Paid','Referral'] },
+    },
+    organic: {
+      kpi:{ users:310, sessions:520, clicks:1800, position:5.2,
+            usersLw:265, sessionsLw:455, clicksLw:1600, positionLw:5.8 },
+      traffic:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{ label:'examprep (organic)', data:[62,72,88,80,92,74,68], color:'#ba7517' }]},
+      donut:{ data:[100], labels:['Organic'] },
+    },
+  },
+};
+
+/* ══ Filter state ══ */
+let currentDomain = 'all';
+let currentChannel = 'all';
+let organicOnly = false;
+
+/* Resolve dataset key — organic toggle overrides channel */
+function resolveKey() {
+  const dom = currentDomain;
+  let ch = organicOnly ? 'organic' : currentChannel;
+  /* Fallback: if specific combo doesn't exist, use 'all' channel */
+  if (!DATA[dom]) return { d:'all', c:'all' };
+  if (!DATA[dom][ch]) ch = 'all';
+  return { d:dom, c:ch };
+}
+function getData() {
+  const {d,c} = resolveKey();
+  return DATA[d][c] || DATA.all.all;
+}
+
+/* ══ Chart instances ══ */
+let charts = {};
+
+function mkChart(id, cfg) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), cfg);
+  return charts[id];
+}
+
+const tooltipDefaults = {
+  backgroundColor:'#fff', borderColor:'#e2e8f0', borderWidth:1,
+  titleColor:'#1e293b', bodyColor:'#64748b', padding:10
+};
+
+/* ══ Render all charts from current data ══ */
+function renderAll() {
+  const d = getData();
+  renderKPIs(d.kpi);
+  renderTraffic(d.traffic);
+  renderDonut(d.donut);
+  updateFilterStatus();
+}
+
+/* KPI cards */
+function renderKPIs(kpi) {
+  const fields = [
+    { valId:'kv1', deltaId:'kd1', prevId:'kp1', cur:kpi.users,    lw:kpi.usersLw,    label:'users',    inv:false },
+    { valId:'kv2', deltaId:'kd2', prevId:'kp2', cur:kpi.sessions, lw:kpi.sessionsLw, label:'sessions', inv:false },
+    { valId:'kv3', deltaId:'kd3', prevId:'kp3', cur:kpi.clicks,   lw:kpi.clicksLw,   label:'clicks',   inv:false },
+    { valId:'kv4', deltaId:'kd4', prevId:'kp4', cur:kpi.position, lw:kpi.positionLw, label:'position', inv:true  },
+  ];
+  fields.forEach(f => {
+    document.getElementById(f.valId).textContent =
+      f.cur === 0 ? 'N/A' : (f.label === 'position' ? f.cur.toFixed(1) : f.cur.toLocaleString());
+    if (f.lw === 0 || f.cur === 0) {
+      document.getElementById(f.deltaId).textContent = '—';
+      document.getElementById(f.prevId).textContent = '';
+      return;
+    }
+    const pct = ((f.cur - f.lw) / f.lw * 100);
+    const better = f.inv ? pct < 0 : pct >= 0;
+    const pill = document.getElementById(f.deltaId);
+    const label = f.inv
+      ? (pct < 0 ? `▼ ${Math.abs(pct).toFixed(1)}% improved` : `▲ ${Math.abs(pct).toFixed(1)}% worse`)
+      : (pct >= 0 ? `▲ ${pct.toFixed(1)}% WoW` : `▼ ${Math.abs(pct).toFixed(1)}% WoW`);
+    pill.textContent = label;
+    pill.className = 'kpi-delta-pill';
+    pill.style.background = better ? '#ecfdf5' : '#fef2f2';
+    pill.style.color = better ? '#059669' : '#dc2626';
+    document.getElementById(f.prevId).textContent =
+      `vs ${f.lw.toLocaleString()} last week`;
+  });
+}
+
+/* Traffic line chart */
+function renderTraffic(t) {
+  const datasets = t.datasets.map(ds => ({
+    label: ds.label,
+    data: ds.data,
+    borderColor: ds.color,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    tension: .35
+  }));
+  mkChart('trafficLine', {
+    type:'line',
+    data:{ labels:t.labels, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults } },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } },
+        y:{ grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 }, callback:v => v>=1000?(v/1000).toFixed(1)+'k':v } }
+      }
+    }
+  });
+  /* Update legend */
+  const leg = document.getElementById('trafficLegend');
+  leg.innerHTML = t.datasets.map(ds =>
+    `<span class="leg-item"><span class="leg-dot" style="background:${ds.color}"></span>${ds.label}</span>`
+  ).join('');
+}
+
+/* Donut chart */
+const donutColors = ['#185fa5','#94a3b8','#1d9e75','#ba7517','#534ab7','#e24b4a','#0ea5e9'];
+function renderDonut(d) {
+  mkChart('channelDonut', {
+    type:'doughnut',
+    data:{
+      labels: d.labels,
+      datasets:[{ data:d.data, backgroundColor:donutColors.slice(0,d.data.length), borderWidth:3, borderColor:'#fff' }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'70%',
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ ...tooltipDefaults, callbacks:{ label:ctx=>ctx.label+': '+ctx.parsed+'%' } }
+      }
+    }
+  });
+  /* Update legend */
+  const leg = document.getElementById('donutLegend');
+  leg.innerHTML = d.labels.map((l,i) =>
+    `<span class="leg-item"><span class="leg-dot" style="background:${donutColors[i]}"></span>${l} ${d.data[i]}%</span>`
+  ).join('');
+}
+
+/* ══ Filter UI handlers ══ */
+function applyFilters() {
+  currentDomain  = document.getElementById('filterDomain').value;
+  currentChannel = document.getElementById('filterChannel').value;
+  if (organicOnly && currentChannel !== 'organic') {
+    document.getElementById('organicCheck').checked = false;
+    organicOnly = false;
+    document.getElementById('organicToggle').classList.remove('active');
+  }
+  renderAll();
+}
+
+function toggleOrganic() {
+  organicOnly = !organicOnly;
+  document.getElementById('organicCheck').checked = organicOnly;
+  const tog = document.getElementById('organicToggle');
+  tog.classList.toggle('active', organicOnly);
+  if (organicOnly) {
+    document.getElementById('filterChannel').value = 'all';
+    currentChannel = 'organic';
+  } else {
+    currentChannel = document.getElementById('filterChannel').value;
+  }
+  renderAll();
+}
+
+function updateFilterStatus() {
+  const domSel = document.getElementById('filterDomain');
+  const chSel  = document.getElementById('filterChannel');
+  const domLabel = domSel.options[domSel.selectedIndex].text;
+  const chLabel  = organicOnly ? 'Organic + LLM (organic only)' : chSel.options[chSel.selectedIndex].text;
+  document.getElementById('filterStatus').textContent =
+    `Showing: ${domLabel} · ${chLabel} · w/e Apr 1 2026 · Replace with live GA4 params`;
+}
+
+/* ══ Opportunity table (position filter) ══ */
+const allOppRows = [
+  { page:'/tnpsc-group-2-preparation', pos:4.4,  impr:6400, ctr:0.049 },
+  { page:'/home/jobs',                 pos:5.6,  impr:4800, ctr:0.060 },
+  { page:'/blog/ai-resume-screening',  pos:9.7,  impr:3200, ctr:0.021 },
+  { page:'/courses/dsa-prep',          pos:8.1,  impr:2900, ctr:0.026 },
+  { page:'/futurejobs/jobs-chennai',   pos:11.3, impr:5100, ctr:0.012 },
+  { page:'/recruitment/hire-freshers', pos:14.8, impr:1800, ctr:0.010 },
+  { page:'/blog/career-guidance-btech',pos:16.2, impr:2100, ctr:0.018 },
+  { page:'/examprep/tnpsc-mock-tests', pos:7.4,  impr:1600, ctr:0.038 },
+  { page:'/futurejobs/bangalore',      pos:13.1, impr:3400, ctr:0.014 },
+  { page:'/blog/govt-job-prep',        pos:18.4, impr:1200, ctr:0.016 },
+];
+function filterOpportunities() {
+  const minP = parseFloat(document.getElementById('posMin').value) || 1;
+  const maxP = parseFloat(document.getElementById('posMax').value) || 50;
+  const BENCH = 0.05;
+  const filtered = allOppRows
+    .filter(r => r.pos >= minP && r.pos <= maxP && r.impr >= 500)
+    .map(r => ({ ...r, score: Math.round(r.impr * Math.max(0, BENCH - r.ctr)) }))
+    .sort((a,b) => b.score - a.score);
+  const tbody = document.getElementById('oppTableBody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">No pages in this position range with impressions > 500</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(r => {
+    const cls = r.pos <= 5 ? 'badge-up' : r.pos <= 10 ? 'badge-warn' : 'badge-down';
+    const ctrFlag = r.ctr < 0.02 ? 'badge-down' : r.ctr < 0.04 ? 'badge-warn' : 'badge-up';
+    return `<tr>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.page}</td>
+      <td><span class="badge ${cls}">${r.pos.toFixed(1)}</span></td>
+      <td>${r.impr.toLocaleString()}</td>
+      <td><span class="badge ${ctrFlag}">${(r.ctr*100).toFixed(1)}%</span></td>
+      <td style="font-weight:600;color:#185fa5">${r.score.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══ CTR decay line ══ */
+mkChart('ctrDecay',{
+  type:'line',
+  data:{
+    labels:['1','2','3','4','5','6','7','8','9','10'],
+    datasets:[
+      { label:'Avg CTR (benchmark)',
+        data:[31.7,24.7,18.7,13.6,9.5,6.1,4.0,3.2,2.8,2.5],
+        borderColor:'#185fa5', backgroundColor:'rgba(24,95,165,.08)',
+        borderWidth:2.5, fill:true, pointRadius:4, pointHoverRadius:6, tension:.4 },
+      { label:'Impacteers actual CTR',
+        data:[25.0,18.2,null,null,6.0,null,null,null,null,null],
+        borderColor:'#1d9e75', backgroundColor:'transparent',
+        borderWidth:2, borderDash:[4,4], pointRadius:5, pointHoverRadius:7, tension:.4,
+        spanGaps:false },
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ display:false },
+      tooltip:{ ...tooltipDefaults, callbacks:{ label:ctx => ctx.dataset.label+': '+(ctx.parsed.y||0).toFixed(1)+'%' } }
+    },
+    scales:{
+      x:{ title:{ display:true, text:'Position in search results', font:{ size:10 }, color:'#94a3b8' },
+          grid:{ display:false }, ticks:{ font:{ size:10 } } },
+      y:{ title:{ display:true, text:'CTR %', font:{ size:10 }, color:'#94a3b8' },
+          grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 }, callback:v=>v+'%' } }
+    }
+  }
+});
+
+/* ══ Branded vs non-branded ══ */
+mkChart('brandBar',{
+  type:'bar',
+  data:{
+    labels:['Branded','Non-branded'],
+    datasets:[
+      { label:'Impressions', data:[8290,25400], backgroundColor:'#b5d4f4', borderRadius:4 },
+      { label:'Clicks',      data:[2920,802],   backgroundColor:'#185fa5', borderRadius:4 },
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index' },
+    plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults, callbacks:{ label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString() } } },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:{ size:10 } } },
+      y:{ grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 }, callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v } }
+    }
+  }
+});
+
+/* ══ LLM bar ══ */
+mkChart('llmBar',{
+  type:'bar',
+  data:{
+    labels:['ChatGPT','Perplexity','Gemini','Claude.ai','You.com'],
+    datasets:[{ label:'Sessions', data:[124,88,41,18,9], backgroundColor:'#534ab7', borderRadius:4, barPercentage:.55 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults } },
+    scales:{
+      x:{ grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 } } },
+      y:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }
+    }
+  }
+});
+
+/* ══ Engagement rate bar ══ */
+mkChart('engBar',{
+  type:'bar',
+  data:{
+    labels:['GJE','Bing org.','Google org.','Referral','Direct','Paid social'],
+    datasets:[{
+      label:'Eng rate %', data:[64,59,47,43,27,15],
+      backgroundColor:['#1d9e75','#1d9e75','#185fa5','#185fa5','#ba7517','#e24b4a'],
+      borderRadius:4, barPercentage:.6
+    }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults, callbacks:{ label:ctx=>ctx.parsed.x+'% engagement rate' } } },
+    scales:{
+      x:{ max:100, grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 }, callback:v=>v+'%' } },
+      y:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }
+    }
+  }
+});
+
+/* ══ Time by source ══ */
+mkChart('timeBar',{
+  type:'bar',
+  data:{
+    labels:['Bing org.','GJE','Google org.','Direct','Referral','Paid'],
+    datasets:[{ label:'Avg time (min)', data:[7.1,0.87,0.80,0.78,0.63,0.03], backgroundColor:'#185fa5', borderRadius:4, barPercentage:.6 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults, callbacks:{ label:ctx=>ctx.parsed.x.toFixed(2)+' min avg' } } },
+    scales:{
+      x:{ grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 }, callback:v=>v+'m' } },
+      y:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }
+    }
+  }
+});
+
+/* ══ Engagement scatter ══ */
+mkChart('engScatter',{
+  type:'scatter',
+  data:{
+    datasets:[
+      { label:'/courses/dsa (78% eng)',    data:[{x:22,y:78}], backgroundColor:'#1d9e75', pointRadius:11, pointHoverRadius:13 },
+      { label:'/tnpsc-group-2 (61% eng)',  data:[{x:39,y:61}], backgroundColor:'#1d9e75', pointRadius:9 },
+      { label:'/blog/ai-resume (55% eng)', data:[{x:45,y:55}], backgroundColor:'#185fa5', pointRadius:8 },
+      { label:'/ Homepage (42% eng)',      data:[{x:58,y:42}], backgroundColor:'#ba7517', pointRadius:9 },
+      { label:'/futurejobs/* (18% eng)',   data:[{x:82,y:18}], backgroundColor:'#e24b4a', pointRadius:11 },
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults, callbacks:{ title:ctx=>ctx[0].dataset.label, label:ctx=>'Bounce: '+ctx.parsed.x+'%  ·  Engagement: '+ctx.parsed.y+'%' } } },
+    scales:{
+      x:{ title:{ display:true, text:'Bounce rate %', font:{ size:10 }, color:'#94a3b8' }, min:0, max:100, grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 } } },
+      y:{ title:{ display:true, text:'Engagement rate %', font:{ size:10 }, color:'#94a3b8' }, min:0, max:100, grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 } } }
+    }
+  }
+});
+
+/* ══ Top pages ══ */
+mkChart('topPages',{
+  type:'bar',
+  data:{
+    labels:['/futurejobs/*','/courses/dsa','/blog/ai-resume','/tnpsc-group-2','/home/jobs','/'],
+    datasets:[{ label:'Users', data:[680,144,288,410,816,3817], backgroundColor:'#185fa5', borderRadius:4, barPercentage:.6 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false }, tooltip:{ ...tooltipDefaults, callbacks:{ label:ctx=>'Users: '+ctx.parsed.x.toLocaleString() } } },
+    scales:{
+      x:{ grid:{ color:'rgba(0,0,0,.04)' }, ticks:{ font:{ size:10 }, callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v } },
+      y:{ grid:{ display:false }, ticks:{ font:{ size:10 } } }
+    }
+  }
+});
+
+/* ══ Init ══ */
+filterOpportunities();
+renderAll();
+renderCTRInsightTable();
+
+/* ══ Date picker ══ */
+let currentDateMode = '7d';
+let customFrom = '', customTo = '';
+
+function toggleDatePicker() {
+  const p = document.getElementById('datePicker');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  // Set today and 7 days ago as defaults
+  if (!document.getElementById('dateTo').value) {
+    const today = new Date();
+    const ago7  = new Date(today); ago7.setDate(today.getDate()-7);
+    document.getElementById('dateTo').value   = today.toISOString().slice(0,10);
+    document.getElementById('dateFrom').value = ago7.toISOString().slice(0,10);
+  }
+  highlightActive();
+}
+function highlightActive() {
+  ['7d','14d','28d'].forEach(id => {
+    const el = document.getElementById('dq-'+id);
+    if (el) el.classList.toggle('active', currentDateMode === id);
+  });
+}
+function setQuickDate(mode, label) {
+  currentDateMode = mode;
+  customFrom = ''; customTo = '';
+  document.getElementById('dateBtnLabel').textContent = label;
+  document.getElementById('dateRangeNote').textContent = '';
+  document.getElementById('datePicker').style.display = 'none';
+  highlightActive();
+  applyFilters();
+}
+function updateCustomLabel() {
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  if (from && to) {
+    const diff = Math.round((new Date(to)-new Date(from))/(1000*60*60*24));
+    document.getElementById('dateRangeNote').textContent = diff > 0 ? diff+' days selected' : 'Invalid range';
+  }
+}
+function applyCustomDate() {
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  if (!from || !to || new Date(from) > new Date(to)) {
+    document.getElementById('dateRangeNote').textContent = 'Please select a valid range';
+    document.getElementById('dateRangeNote').style.color = '#dc2626';
+    return;
+  }
+  currentDateMode = 'custom';
+  customFrom = from; customTo = to;
+  const fmtDate = d => new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+  document.getElementById('dateBtnLabel').textContent = fmtDate(from)+' – '+fmtDate(to);
+  document.getElementById('datePicker').style.display = 'none';
+  document.getElementById('dateRangeNote').style.color = '#94a3b8';
+  applyFilters();
+}
+/* Close picker on outside click */
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('dateBtn')?.closest('.filter-group');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('datePicker').style.display = 'none';
+  }
+});
+
+/* ══ CTR whitespace filler — ranked pages by CTR drop vs benchmark ══ */
+function renderCTRInsightTable() {
+  const benchmarks = [31.7,24.7,18.7,13.6,9.5,6.1,4.0,3.2,2.8,2.5];
+  const oppRows = [
+    { page:'/futurejobs/jobs-chennai',    pos:11.3, impr:5100, ctr:0.012 },
+    { page:'/futurejobs/bangalore',        pos:13.1, impr:3400, ctr:0.014 },
+    { page:'/blog/ai-resume-scree...',     pos:9.7,  impr:3200, ctr:0.021 },
+    { page:'/recruitment/hire-fresh...',   pos:14.8, impr:1800, ctr:0.010 },
+    { page:'/courses/dsa-prep',            pos:8.1,  impr:2900, ctr:0.026 },
+    { page:'/blog/career-guidance...',     pos:16.2, impr:2100, ctr:0.018 },
+    { page:'/blog/govt-job-prep',          pos:18.4, impr:1200, ctr:0.016 },
+    { page:'/examprep/tnpsc-moc...',       pos:7.4,  impr:1600, ctr:0.038 },
+    { page:'/tnpsc-group-2-prepar...',     pos:4.4,  impr:6400, ctr:0.049 },
+    { page:'/home/jobs',                   pos:5.6,  impr:4800, ctr:0.060 },
+  ];
+  const BENCH = 0.05;
+  const rows = oppRows
+    .map(r => ({ ...r, score: Math.round(r.impr * Math.max(0, BENCH - r.ctr)) }))
+    .sort((a,b) => b.score - a.score);
+
+  const container = document.getElementById('ctrInsightTable');
+  if (!container) return;
+  container.innerHTML = rows.map(r => {
+    const posCls = r.pos <= 5 ? 'badge-up' : r.pos <= 10 ? 'badge-warn' : 'badge-down';
+    const ctrCls = r.ctr < 0.02 ? 'badge-down' : r.ctr < 0.04 ? 'badge-warn' : 'badge-up';
+    const scoreCls = r.score > 100 ? '#dc2626' : r.score > 50 ? '#b45309' : '#059669';
+    return `<tr>
+      <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">${r.page}</td>
+      <td><span class="badge ${posCls}">${r.pos.toFixed(1)}</span></td>
+      <td style="font-size:10px">${r.impr.toLocaleString()}</td>
+      <td><span class="badge ${ctrCls}">${(r.ctr*100).toFixed(1)}%</span></td>
+      <td style="font-weight:700;color:${scoreCls};font-size:11px">${r.score.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+</script>
+</body>
+</html>
