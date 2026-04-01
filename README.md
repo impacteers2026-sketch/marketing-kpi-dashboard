@@ -12,7 +12,7 @@
 ## Live Dashboard
 
 > Replace this URL after GitHub Pages is enabled:
-> **https://YOUR_USERNAME.github.io/impacteers-kpi-dashboard/**
+> **https://impacteers2026-sketch.github.io/marketing-kpi-dashboard/**
 
 ---
 
@@ -447,60 +447,7 @@ POST https://www.googleapis.com/webmasters/v3/sites/{SITE_URL}/searchAnalytics/q
 - [ ] End-to-end test with live data
 - [ ] Update live GitHub Pages URL in dashboard topbar
 
----
-
-## 🚀 Make It Live — GitHub Pages Setup
-
-### Step 1 — Prepare the file
-
-```bash
-# Rename the dashboard file to index.html
-# GitHub Pages serves index.html automatically at the root URL
-cp impacteers_kpi_dashboard_v4.html index.html
-```
-
-### Step 2 — Create the GitHub repository
-
-1. Go to **https://github.com/new**
-2. Repository name: `impacteers-kpi-dashboard`
-3. Set to **Public** (required for free GitHub Pages)
-4. Do **not** initialise with README (you already have files)
-5. Click **Create repository**
-
-### Step 3 — Push to GitHub
-
-```bash
-# Run these commands in your terminal from the folder containing index.html
-
-git init
-git add index.html README.md
-git commit -m "feat: Impacteers KPI Dashboard v4 — GA4 + GSC"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/impacteers-kpi-dashboard.git
-git push -u origin main
-```
-
-> Replace `YOUR_USERNAME` with your actual GitHub username.
-
-### Step 4 — Enable GitHub Pages
-
-1. In the repository, go to **Settings** (top menu)
-2. Scroll down to **Pages** in the left sidebar
-3. Under **Source**, select:
-   - Branch: `main`
-   - Folder: `/ (root)`
-4. Click **Save**
-
-### Step 5 — Get your live URL
-
-```
-https://YOUR_USERNAME.github.io/impacteers-kpi-dashboard/
-```
-
-> GitHub Pages takes **1–2 minutes** to activate after the first push.
-> Subsequent pushes update the live page within **30–60 seconds**.
-
-### Step 6 — Update the dashboard with the live URL
+### Step 5 — Update the dashboard with the live URL
 
 Once you have the URL, open `index.html` and find this line in the topbar:
 
@@ -596,3 +543,4 @@ These metrics are reserved for the next instrumentation phase:
 
 *Impacteers / Genrichers Innovations Pvt Ltd — Chennai*
 *Dashboard v4.0 — April 2026 — GA4 + GSC Direct API*
+*Crafted by — Girish Kumar G | Programmatic SEO Manager*
