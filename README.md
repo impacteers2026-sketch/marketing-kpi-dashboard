@@ -447,7 +447,7 @@ POST https://www.googleapis.com/webmasters/v3/sites/{SITE_URL}/searchAnalytics/q
 - [ ] End-to-end test with live data
 - [ ] Update live GitHub Pages URL in dashboard topbar
 
-### Step 5 — Update the dashboard with the live URL
+### Update the dashboard with the live URL
 
 Once you have the URL, open `index.html` and find this line in the topbar:
 
